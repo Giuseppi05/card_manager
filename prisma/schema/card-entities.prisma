@@ -1,0 +1,109 @@
+model Card {
+    id    String @id @default(cuid())
+    name  String
+    hp    Int?
+    power Int    @default(1)
+    isActive Boolean @default(false)
+    isVisible Boolean @default(false)
+
+    // Estética base
+    bgColor     String? @default("#fbbf24")
+    borderColor String? @default("#fbbf24")
+    textColor   String? @default("#000000")
+
+    // Relaciones obligatorias
+    expansionId   String
+    expansion     Expansion   @relation(fields: [expansionId], references: [id])
+    classId       String
+    class         Class       @relation(fields: [classId], references: [id])
+    affiliationId String
+    affiliation   Affiliation @relation(fields: [affiliationId], references: [id])
+    textureId     String      @default("")
+    texture       Texture     @relation(fields: [textureId], references: [id])
+    typeId        String
+    cardType      CardType    @relation(fields: [typeId], references: [id])
+    longLogoId  String
+    longLogo    Logo?  @relation(fields: [longLogoId], references: [id])
+
+    // Movimientos (Máximo 2 según tu descripción)
+    moves Move[]
+
+    // --- LAS VARIACIONES (SKINS) ---
+    // Una carta tiene muchas variantes visuales, pero es la misma carta lógica
+    variants CardVariant[]
+    userVariants UserCardVariant[]
+
+    // --- RELACIÓN DE LEVELS (Auto-relación) ---
+    // Una carta "Base" puede tener una carta "Level" asociada
+    baseCardId   String?
+    baseCard     Card?   @relation("CardLevels", fields: [baseCardId], references: [id])
+    levelUpCards Card[]  @relation("CardLevels")
+    tags        CardTags[]
+
+    // Dueños (Muchos a muchos con usuarios)
+    owners UserCard[]
+}
+
+model CardVariant {
+    id            String @id @default(cuid())
+    cardId        String
+    card          Card   @relation(fields: [cardId], references: [id])
+    variantName   String // Identificador de la skin
+    imageUrl      String
+    fullRenderUrl String // El render completo que mencionas (Cloudinary)
+
+    posX Float @default(0)
+    posY Float @default(0)
+    zoom Float @default(1)
+
+    // --- VARIACIONES DE COLOR ESPECÍFICAS ---
+    // Si esta skin cambia los colores de la carta base
+    overrideBgColor     String?
+    overrideBorderColor String?
+    overrideTextColor   String?
+
+    isDefault Boolean @default(false)
+    isActive  Boolean @default(false)
+    
+    // Usuarios que poseen esta variante
+    owners UserCardVariant[]
+}
+
+model Move {
+    id          String  @id @default(cuid())
+    name        String
+    damage      Int?
+    description String?
+    type        String
+    cardId      String
+    card        Card    @relation(fields: [cardId], references: [id])
+    tags        MoveTags[]
+}
+
+model MoveTags {
+    id        String @id @default(cuid())
+    moveId    String
+    move      Move   @relation(fields: [moveId], references: [id])
+    tagId     String
+    tag       TagMovement @relation(fields: [tagId], references: [id])
+}
+
+model TagMovement {
+    id     String @id @default(cuid())
+    name   String
+    moves  MoveTags[]
+}
+
+model CardTags {
+    id        String @id @default(cuid())
+    cardId    String
+    card      Card   @relation(fields: [cardId], references: [id])
+    tagId     String
+    tag       TagCard @relation(fields: [tagId], references: [id])
+}
+
+model TagCard {
+    id     String @id @default(cuid())
+    name   String
+    cards  CardTags[]
+}

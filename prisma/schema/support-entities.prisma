@@ -1,0 +1,34 @@
+model Class {
+    id    String @id @default(cuid())
+    name  String @unique
+    logo  String
+    cards Card[]
+}
+
+model Affiliation {
+    id    String @id @default(cuid())
+    name  String @unique
+    logo  String
+    cards Card[]
+}
+
+model Texture {
+    id    String @id @default(cuid())
+    name  String @unique
+    image String
+    cards Card[]
+}
+
+model CardType {
+    id    String @id @default(cuid())
+    name  String @unique
+    cards Card[]
+}
+
+model Logo {
+    id    String @id @default(cuid())
+    name  String @unique
+    image String
+    type  String
+    cards Card[]
+}
