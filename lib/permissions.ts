@@ -4,10 +4,12 @@ const PERMISSION_DEFINITION = {
     games: [
         "readAll",
         "readAllByUser",
+        "readAllActiveByUser",
         "readOne",
         "create",
         "update",
-        "delete"
+        "delete",
+        "addToUser"
     ],
     expansion: [
         "readAll",

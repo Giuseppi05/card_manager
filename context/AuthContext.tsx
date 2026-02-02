@@ -3,19 +3,14 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { User } from "@supabase/supabase-js";
+import { User as PrismaUser, Role } from "@prisma/client";
 import { useRouter } from "next/navigation";
 
-interface UserData {
-  id: string;
-  email: string;
-  name: string;
-  role: string;
-  createdAt?: string;
-}
+type UserWithRole = PrismaUser & { role: Role };
 
 interface AuthContextType {
   user: User | null;
-  userData: UserData | null;
+  userData: UserWithRole | null;
   loading: boolean;
   isAdmin: boolean;
   isAuthenticated: boolean;
@@ -35,7 +30,7 @@ const AuthContext = createContext<AuthContextType>({
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [userData, setUserData] = useState<UserData | null>(null);
+  const [userData, setUserData] = useState<UserWithRole | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const supabase = createClient();
@@ -106,7 +101,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const isAdmin = userData?.role === "ADMIN";
+  const isAdmin = userData?.role.name === "ADMIN";
   const isAuthenticated = !!user;
 
   return (

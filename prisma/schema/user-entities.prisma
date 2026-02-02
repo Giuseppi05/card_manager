@@ -1,43 +1,66 @@
 model User {
-    id         String  @id @default(uuid())
-    email      String  @unique
-    name       String  @unique
-    coins      Int     @default(0)
-    powerLevel Int     @default(0)
-    isActive   Boolean @default(true)
-    roleId     String
-    role       Role    @relation(fields: [roleId], references: [id])
+  id            String   @id @default(uuid())
+  email         String   @unique
+  name          String   @unique
+  coins         Int      @default(0)
+  powerLevel    Int      @default(0)
+  isActive      Boolean  @default(true)
+  
+  roleId        String
+  role          Role     @relation(fields: [roleId], references: [id])
 
-    inventory     UserCard[]
-    ownedVariants UserCardVariant[]
-}
+  inventory     UserCard[]
+  ownedVariants UserCardVariant[]
 
-model UserCard {
-    id              String  @id @default(cuid())
-    userId          String
-    user            User    @relation(fields: [userId], references: [id])
-    cardId          String
-    card            Card    @relation(fields: [cardId], references: [id])
-    activeVariantId String?
+  games         UserGame[]
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-    @@unique([userId, cardId])
-}
-
-model UserCardVariant {
-    id        String      @id @default(cuid())
-    userId    String
-    user      User        @relation(fields: [userId], references: [id])
-    cardId    String
-    card      Card        @relation(fields: [cardId], references: [id])
-    variantId String
-    variant   CardVariant @relation(fields: [variantId], references: [id])
-
-    @@unique([userId, cardId, variantId])
 }
 
 model Role {
-    id          String @id @default(cuid())
-    name        String @unique
-    permissions Json
-    users       User[]
+  id          String   @id @default(cuid())
+  name        String   @unique
+  permissions Json
+  users       User[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Inventario de Cartas Lógicas (Progreso en el juego)
+model UserCard {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  cardId          String
+  card            Card     @relation(fields: [cardId], references: [id])
+  
+  // Preferencia del usuario: ¿Qué skin quiere ver cuando use esta carta?
+  activeVariantId String?  
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([userId, cardId])
+}
+
+// Inventario de Skins (Coleccionismo)
+model UserCardVariant {
+  id        String      @id @default(cuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id])
+  
+  // Relaciones directas para facilitar consultas
+  cardId    String
+  card      Card        @relation(fields: [cardId], references: [id])
+  
+  variantId String
+  variant   CardVariant @relation(fields: [variantId], references: [id])
+  
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@unique([userId, cardId, variantId])
 }

@@ -4,6 +4,7 @@ import InputText from "@/components/forms/InputText";
 import Button from "@/components/forms/Button";
 import GoogleButton from "@/components/forms/GoogleButton";
 import { createClient } from "@/lib/supabase/client";
+import { useLogin } from "../hooks/useLogin";
 
 interface RegisterFormProps {
   onToggleForm: () => void;
@@ -13,7 +14,17 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleForm }) => {
 
   const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
   const [loading, setLoading] = useState(false);
-  const [feedback, setFeedback] = useState<{ type: 'error' | 'success', message: string } | null>(null);
+  const [localError, setLocalError] = useState<string | null>(null);
+  
+  const { login } = useLogin({
+    redirectPath: "/games",
+    onError: (error) => {
+      console.error("Error en login automático:", error);
+      setLocalError("Cuenta creada correctamente, pero hubo un problema con el login automático. Por favor inicia sesión manualmente.");
+      setTimeout(onToggleForm, 2000);
+      setLoading(false);
+    }
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -21,15 +32,15 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleForm }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFeedback(null);
+    setLocalError(null);
 
     if (form.password !== form.confirm) {
-      setFeedback({ type: 'error', message: "Las contraseñas no coinciden" });
+      setLocalError("Las contraseñas no coinciden");
       return;
     }
 
     if (form.password.length < 6) {
-      setFeedback({ type: 'error', message: "La contraseña debe tener al menos 6 caracteres" });
+      setLocalError("La contraseña debe tener al menos 6 caracteres");
       return;
     }
 
@@ -46,16 +57,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleForm }) => {
 
       if (!res.ok) throw new Error(data.error || "Error al registrarse");
 
-      setFeedback({
-        type: 'success',
-        message: data.message || "¡Cuenta creada! Verifica tu correo electrónico."
-      });
-
-      setTimeout(onToggleForm, 1500);
+      // Login automático después del registro exitoso
+      await login({ email: form.email, password: form.password });
 
     } catch (error: any) {
-      setFeedback({ type: 'error', message: error.message });
-    } finally {
+      setLocalError(error.message);
       setLoading(false);
     }
   };
@@ -80,10 +86,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleForm }) => {
         <p className="text-gray-600">Crea tu cuenta y empieza a jugar</p>
       </div>
 
-      {feedback && (
-        <div className={`p-4 rounded-md text-sm font-medium border ${feedback.type === 'error' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-green-50 text-green-700 border-green-200'
-          }`}>
-          {feedback.message}
+      {localError && (
+        <div className="p-4 rounded-md text-sm font-medium border bg-red-50 text-red-700 border-red-200">
+          {localError}
         </div>
       )}
 

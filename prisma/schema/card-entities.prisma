@@ -1,109 +1,131 @@
 model Card {
-    id    String @id @default(cuid())
-    name  String
-    hp    Int?
-    power Int    @default(1)
-    isActive Boolean @default(false)
-    isVisible Boolean @default(false)
+  id        String  @id @default(cuid())
+  name      String
+  hp        Int?
+  power     Int     @default(1)
+  isActive  Boolean @default(false)
+  isVisible Boolean @default(false)
 
-    // Estética base
-    bgColor     String? @default("#fbbf24")
-    borderColor String? @default("#fbbf24")
-    textColor   String? @default("#000000")
+  // --- RELACIONES ESTRUCTURALES ---
+  expansionId String
+  expansion   Expansion @relation(fields: [expansionId], references: [id])
 
-    // Relaciones obligatorias
-    expansionId   String
-    expansion     Expansion   @relation(fields: [expansionId], references: [id])
-    classId       String
-    class         Class       @relation(fields: [classId], references: [id])
-    affiliationId String
-    affiliation   Affiliation @relation(fields: [affiliationId], references: [id])
-    textureId     String      @default("")
-    texture       Texture     @relation(fields: [textureId], references: [id])
-    typeId        String
-    cardType      CardType    @relation(fields: [typeId], references: [id])
-    longLogoId  String
-    longLogo    Logo?  @relation(fields: [longLogoId], references: [id])
+  typeId   String
+  cardType CardType @relation(fields: [typeId], references: [id])
 
-    // Movimientos (Máximo 2 según tu descripción)
-    moves Move[]
+  // --- MANY-TO-MANY IMPLÍCITOS ---
+  classes      Class[]
+  affiliations Affiliation[]
 
-    // --- LAS VARIACIONES (SKINS) ---
-    // Una carta tiene muchas variantes visuales, pero es la misma carta lógica
-    variants CardVariant[]
-    userVariants UserCardVariant[]
+  // --- TAGS UNIFICADOS ---
+  // Relación muchos-a-muchos limpia. 
+  // Una carta puede tener tags de "Dragon" (Raza) y "Fuego" (Elemento)
+  tags Tag[]
 
-    // --- RELACIÓN DE LEVELS (Auto-relación) ---
-    // Una carta "Base" puede tener una carta "Level" asociada
-    baseCardId   String?
-    baseCard     Card?   @relation("CardLevels", fields: [baseCardId], references: [id])
-    levelUpCards Card[]  @relation("CardLevels")
-    tags        CardTags[]
+  // --- GAMEPLAY ---
+  moves Move[]
 
-    // Dueños (Muchos a muchos con usuarios)
-    owners UserCard[]
+  // --- VARIANTES ---
+  variants CardVariant[]
+
+  // --- EVOLUCIÓN ---
+  baseCardId   String?
+  baseCard     Card?   @relation("CardLevels", fields: [baseCardId], references: [id])
+  levelUpCards Card[]  @relation("CardLevels")
+
+  userCards        UserCard[]
+  userCardVariants UserCardVariant[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
+// ==========================================
+// CARD AESTHETICS (Variantes Visuales)
+// ==========================================
+
 model CardVariant {
-    id            String @id @default(cuid())
-    cardId        String
-    card          Card   @relation(fields: [cardId], references: [id])
-    variantName   String // Identificador de la skin
-    imageUrl      String
-    fullRenderUrl String // El render completo que mencionas (Cloudinary)
+  id     String @id @default(cuid())
+  cardId String
+  card   Card   @relation(fields: [cardId], references: [id])
 
-    posX Float @default(0)
-    posY Float @default(0)
-    zoom Float @default(1)
+  variantName String @default("default")
 
-    // --- VARIACIONES DE COLOR ESPECÍFICAS ---
-    // Si esta skin cambia los colores de la carta base
-    overrideBgColor     String?
-    overrideBorderColor String?
-    overrideTextColor   String?
+  // --- ASSETS VISUALES ---
+  imageUrl      String
+  fullRenderUrl String
 
-    isDefault Boolean @default(false)
-    isActive  Boolean @default(false)
-    
-    // Usuarios que poseen esta variante
-    owners UserCardVariant[]
+  textureId String?
+  texture   Texture? @relation(fields: [textureId], references: [id])
+
+  longLogoId String?
+  longLogo   Logo?   @relation("VariantVisualLogo", fields: [longLogoId], references: [id])
+
+  // --- CUSTOMIZACIÓN ---
+  bgColor     String? @default("#fbbf24")
+  borderColor String? @default("#fbbf24")
+  textColor   String? @default("#000000")
+
+  // --- POSICIONAMIENTO ---
+  posX Float @default(0)
+  posY Float @default(0)
+  zoom Float @default(1)
+
+  // --- ESTADOS ---
+  isDefault Boolean @default(false)
+  isActive  Boolean @default(false)
+
+  owners UserCardVariant[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Move {
-    id          String  @id @default(cuid())
-    name        String
-    damage      Int?
-    description String?
-    type        String
-    cardId      String
-    card        Card    @relation(fields: [cardId], references: [id])
-    tags        MoveTags[]
+  id          String  @id @default(cuid())
+  name        String
+  damage      Int?
+  description String?
+
+  type   MoveType @relation(fields: [typeId], references: [id])
+  typeId String
+
+  cardId String
+  card   Card   @relation(fields: [cardId], references: [id])
+
+  // Relación directa con la tabla unificada de Tags
+  tags Tag[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model MoveTags {
-    id        String @id @default(cuid())
-    moveId    String
-    move      Move   @relation(fields: [moveId], references: [id])
-    tagId     String
-    tag       TagMovement @relation(fields: [tagId], references: [id])
+model MoveType {
+  id     String @id @default(cuid())
+  name   String @unique
+  symbol String
+  moves  Move[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model TagMovement {
-    id     String @id @default(cuid())
-    name   String
-    moves  MoveTags[]
+// --- MODELO UNIFICADO DE TAGS ---
+model Tag {
+  id   String @id @default(cuid())
+  name String @unique
+
+  category TagCategory @default(CARD)
+
+  // Relaciones inversas (Prisma las gestiona)
+  cards Card[]
+  moves Move[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model CardTags {
-    id        String @id @default(cuid())
-    cardId    String
-    card      Card   @relation(fields: [cardId], references: [id])
-    tagId     String
-    tag       TagCard @relation(fields: [tagId], references: [id])
-}
-
-model TagCard {
-    id     String @id @default(cuid())
-    name   String
-    cards  CardTags[]
+enum TagCategory {
+  CARD
+  MOVE
 }

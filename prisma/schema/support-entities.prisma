@@ -1,34 +1,51 @@
 model Class {
-    id    String @id @default(cuid())
-    name  String @unique
-    logo  String
-    cards Card[]
+  id        String   @id @default(cuid())
+  name      String   @unique
+  logo      String
+  cards     Card[]   // Relación implícita M:N manejada por Prisma
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Affiliation {
-    id    String @id @default(cuid())
-    name  String @unique
-    logo  String
-    cards Card[]
+  id        String   @id @default(cuid())
+  name      String   @unique
+  logo      String
+  cards     Card[]   // Relación implícita M:N manejada por Prisma
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Texture {
-    id    String @id @default(cuid())
-    name  String @unique
-    image String
-    cards Card[]
+  id        String        @id @default(cuid())
+  name      String        @unique
+  image     String
+  variants  CardVariant[] // Relacionado con variantes, no cards directas
+  
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 }
 
 model CardType {
-    id    String @id @default(cuid())
-    name  String @unique
-    cards Card[]
+  id        String   @id @default(cuid())
+  name      String   @unique
+  cards     Card[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Logo {
-    id    String @id @default(cuid())
-    name  String @unique
-    image String
-    type  String
-    cards Card[]
+  id            String   @id @default(cuid())
+  name          String   @unique
+  image         String
+  type          String 
+  
+  // Relaciones diferenciadas
+  variantLogos  CardVariant[] @relation("VariantVisualLogo")
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }

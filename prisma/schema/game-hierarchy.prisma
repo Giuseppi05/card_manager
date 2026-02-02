@@ -1,0 +1,53 @@
+model Game {
+  id          String   @id @default(cuid())
+  name        String
+  image       String?
+  generations Generation[]
+  users       UserGame[]
+  isActive    Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Generation {
+  id           String   @id @default(cuid())
+  name         String
+  image        String?
+  logo         String?
+  isActive     Boolean  @default(false)
+  
+  gameId       String
+  game         Game     @relation(fields: [gameId], references: [id])
+  
+  expansions   Expansion[]
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Expansion {
+  id           String   @id @default(cuid())
+  name         String
+  logo         String?
+  isActive     Boolean  @default(false)
+  
+  generationId String
+  generation   Generation @relation(fields: [generationId], references: [id])
+  
+  cards        Card[]
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model UserGame {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  gameId    String
+  game      Game     @relation(fields: [gameId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

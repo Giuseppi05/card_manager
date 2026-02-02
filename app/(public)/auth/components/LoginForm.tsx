@@ -1,9 +1,8 @@
 "use client";
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 import InputText from "@/components/forms/InputText";
 import Button from "@/components/forms/Button";
-import { useAuth } from "@/context/AuthContext";
+import { useLogin } from "../hooks/useLogin";
 
 interface LoginFormProps {
   onToggleForm?: () => void;
@@ -12,14 +11,17 @@ interface LoginFormProps {
 
 const LoginForm: React.FC<LoginFormProps> = ({ 
   onToggleForm, 
-  redirectPath = "/dashboard" 
+  redirectPath = "/games" 
 }) => {
-  const router = useRouter();
-  const { refreshSession } = useAuth();
-  
   const [form, setForm] = useState({ email: "", password: "" });
-  const [loading, setLoading] = useState(false);
-  const [feedback, setFeedback] = useState<{ type: 'error' | 'success', message: string } | null>(null);
+  const [localError, setLocalError] = useState<string | null>(null);
+  
+  const { login, isLoading } = useLogin({
+    redirectPath,
+    onError: (error) => {
+      setLocalError(error);
+    }
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -27,60 +29,15 @@ const LoginForm: React.FC<LoginFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFeedback(null);
+    setLocalError(null);
 
     // Validación de longitud mínima
     if (form.password.length < 6) {
-      setFeedback({ type: 'error', message: "La contraseña debe tener al menos 6 caracteres" });
+      setLocalError("La contraseña debe tener al menos 6 caracteres");
       return;
     }
 
-    setLoading(true);
-
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: form.email, password: form.password }),
-      });
-
-      // Verificar content-type antes de parsear
-      const contentType = res.headers.get("content-type");
-      
-      if (!contentType || !contentType.includes("application/json")) {
-        console.error("Respuesta no es JSON:", await res.text());
-        throw new Error("Error del servidor. Por favor intenta de nuevo.");
-      }
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Error al iniciar sesión");
-      }
-
-      // Éxito
-      setFeedback({ 
-        type: 'success', 
-        message: data.message || '¡Sesión iniciada correctamente!' 
-      });
-      
-      // Actualizamos el estado global
-      await refreshSession();
-      
-      // Redireccionamos después de un breve delay
-      setTimeout(() => {
-        router.push(redirectPath);
-      }, 1000);
-
-    } catch (error: any) {
-      console.error("Error en login:", error);
-      setFeedback({ 
-        type: 'error', 
-        message: error.message || "Error de conexión. Intenta de nuevo." 
-      });
-    } finally {
-      setLoading(false);
-    }
+    await login({ email: form.email, password: form.password });
   };
 
   return (
@@ -90,13 +47,9 @@ const LoginForm: React.FC<LoginFormProps> = ({
         <p className="text-gray-600">Inicia sesión para continuar</p>
       </div>
 
-      {feedback && (
-        <div className={`p-4 rounded-md text-sm font-medium border ${
-          feedback.type === 'error' 
-            ? 'bg-red-50 text-red-700 border-red-200' 
-            : 'bg-green-50 text-green-700 border-green-200'
-        }`}>
-          {feedback.message}
+      {localError && (
+        <div className="p-4 rounded-md text-sm font-medium border bg-red-50 text-red-700 border-red-200">
+          {localError}
         </div>
       )}
 
@@ -132,8 +85,8 @@ const LoginForm: React.FC<LoginFormProps> = ({
         </div>
         */}
 
-        <Button type="submit" variant="primary" fullWidth disabled={loading}>
-          {loading ? "Iniciando sesión..." : "Iniciar sesión"}
+        <Button type="submit" variant="primary" fullWidth disabled={isLoading}>
+          {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
         </Button>
       </form>
 

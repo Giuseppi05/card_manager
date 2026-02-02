@@ -14,14 +14,13 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
 
   // Definir rutas por tipo
-  const publicRoutes = ['/']
   const authRoutes = ['/auth']
-  const protectedRoutes = ['/dashboard', '/cards']
+  const protectedRoutes = ['/games', '/cards']
   const adminRoutes = ['/admin']
 
   // Si intenta acceder a ruta de auth estando autenticado → home
   if (user && authRoutes.some(route => path.startsWith(route))) {
-    return NextResponse.redirect(new URL('/', request.url))
+    return NextResponse.redirect(new URL('/games', request.url))
   }
 
   // Si no está autenticado e intenta acceder a ruta protegida → auth
