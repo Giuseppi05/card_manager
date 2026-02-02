@@ -46,7 +46,7 @@ const Page = () => {
   if (loading || !user) return null;
 
   return (
-    <div className='min-h-screen w-full px-4 py-6 sm:px-6 lg:px-8'>
+    <div className='px-4 py-6 sm:px-6 lg:px-8'>
       {/* Header con título y botón agregar */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
         <h1 className='text-xl sm:text-2xl font-bold'>Mis juegos</h1>
