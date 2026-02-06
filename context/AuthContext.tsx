@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { User as PrismaUser, Role } from "@prisma/client";
 import { useRouter } from "next/navigation";
+import { useUserRealtime } from "@/hooks/useSupabaseRealtime";
 
 type UserWithRole = PrismaUser & { role: Role };
 
@@ -34,6 +35,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const supabase = createClient();
+
+  // Hook para actualizaciones en tiempo real del usuario
+  useUserRealtime(user?.id || null, (updatedUserData) => {
+    setUserData(prev => prev ? { ...prev, ...updatedUserData } : null);
+  });
 
   // Función para obtener datos del usuario desde tu API
   const fetchUserData = async (userId: string) => {
@@ -81,6 +87,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.error("Error al cerrar sesión:", error);
     }
   };
+
+  // Hook para actualizaciones en tiempo real del usuario
+  useUserRealtime(user?.id || null, (updatedUserData) => {
+    setUserData(prev => prev ? { ...prev, ...updatedUserData } : null);
+  });
 
   useEffect(() => {
     refreshSession();

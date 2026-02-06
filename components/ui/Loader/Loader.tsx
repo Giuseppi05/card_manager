@@ -31,7 +31,7 @@ const Loader: React.FC<LoaderProps> = ({
         aria-label="Cargando"
       />
       {text && (
-        <p className={`${textSizeClasses[size]} text-white font-medium`}>
+        <p className={`${textSizeClasses[size]}  font-medium ${overlay ? 'text-white' : 'text-gray-700'}`}>
           {text}
         </p>
       )}

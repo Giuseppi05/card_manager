@@ -49,6 +49,7 @@ export async function GET(
         id: true,
         email: true,
         name: true,
+        coins: true,
         role: {
           select: {
             name: true,
@@ -69,6 +70,7 @@ export async function GET(
         id: userData.id,
         email: userData.email,
         name: userData.name,
+        coins: userData.coins,
         role: userData.role.name,
       },
     });

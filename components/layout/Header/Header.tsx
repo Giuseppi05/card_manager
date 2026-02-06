@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSignOutAlt, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faSignOutAlt, faUser, faCoins } from '@fortawesome/free-solid-svg-icons';
 
 const Header: React.FC = () => {
   const { user, userData, logout } = useAuth();
@@ -36,6 +36,10 @@ const Header: React.FC = () => {
 
   const getUserName = () => {
     return userData?.name || user?.email?.split('@')[0] || 'Usuario';
+  };
+
+  const getUserMoney = () => {
+    return userData?.coins ? `${userData.coins}` : '0';
   };
 
   const handleLogout = async () => {
@@ -65,17 +69,28 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 relative z-50">
-      <div className="flex items-center justify-between h-16">
+    <header className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 relative z-30 h-16">
+      <div className="flex items-center justify-end h-16">
         {/* Logo / App Name */}
-        <div className="flex items-center">
+        {/* <div className="flex items-center">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
             Card Manager
           </h1>
-        </div>
+        </div> */}
 
         {/* User Menu */}
-        <div className="flex items-center relative">
+        <div className="flex items-center space-x-4">
+          {/* Dinero del usuario - minimalista */}
+          <div className="flex items-center space-x-2 bg-gray-100 px-3 py-1.5 rounded-full select-none">
+            <FontAwesomeIcon 
+              icon={faCoins} 
+              className="h-3 w-3 text-yellow-600" 
+            />
+            <span className="text-xs font-medium text-gray-700">
+              {getUserMoney()}
+            </span>
+          </div>
+          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
@@ -101,7 +116,7 @@ const Header: React.FC = () => {
             
             <DropdownMenuContent 
               align="end" 
-              className="w-48 z-[60] bg-white border border-gray-200 shadow-lg"
+              className="w-48 z-60 bg-white border border-gray-200 shadow-lg"
               sideOffset={5}
             >
               {/* Mobile: Mostrar info del usuario */}
