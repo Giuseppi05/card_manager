@@ -13,7 +13,6 @@ model Game {
 model Generation {
   id           String   @id @default(cuid())
   name         String
-  image        String?
   logo         String?
   isActive     Boolean  @default(false)
   
@@ -29,7 +28,6 @@ model Generation {
 model Expansion {
   id           String   @id @default(cuid())
   name         String
-  logo         String?
   isActive     Boolean  @default(false)
   
   generationId String

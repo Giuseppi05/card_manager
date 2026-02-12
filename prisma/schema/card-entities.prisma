@@ -16,6 +16,7 @@ model Card {
   // --- MANY-TO-MANY IMPLÍCITOS ---
   classes      Class[]
   affiliations Affiliation[]
+  isAffiliationMarked Boolean @default(false) 
 
   // --- TAGS UNIFICADOS ---
   // Relación muchos-a-muchos limpia. 
@@ -64,6 +65,7 @@ model CardVariant {
   // --- CUSTOMIZACIÓN ---
   bgColor     String? @default("#fbbf24")
   borderColor String? @default("#fbbf24")
+  borderInternalColor String? @default("#fbbf24")
   textColor   String? @default("#000000")
 
   // --- POSICIONAMIENTO ---
@@ -86,6 +88,7 @@ model Move {
   name        String
   damage      Int?
   description String?
+  expandedDescription String?
 
   type   MoveType @relation(fields: [typeId], references: [id])
   typeId String
