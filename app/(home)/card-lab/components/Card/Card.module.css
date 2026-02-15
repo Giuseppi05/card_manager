@@ -1,0 +1,53 @@
+/* Estilos para las cartas */
+.card-container {
+  width: 360px;
+  height: 504px; /* h-150 equivalent */
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.card-image {
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Clases de utilidad personalizadas */
+.w-90 {
+  width: 360px;
+}
+
+.h-150 {
+  height: 504px;
+}
+
+.w-15 {
+  width: 60px;
+}
+
+.h-15 {
+  height: 60px;
+}
+
+.w-9\/10 {
+  width: 90%;
+}
+
+.border-5 {
+  border-width: 5px;
+}
+
+/* Ajustes para inputs de movimientos */
+.hp-input {
+  max-width: 64px;
+}
+
+.max-w-15 {
+  max-width: 60px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .card-container {
+    width: 300px;
+    height: 420px;
+  }
+}

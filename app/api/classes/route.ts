@@ -3,7 +3,15 @@ import { prisma } from '@/lib/prisma/prisma';
 
 export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const gameId = searchParams.get('gameId');
+    
+    if (!gameId) {
+      return NextResponse.json({ error: 'gameId is required' }, { status: 400 });
+    }
+
     const classes = await prisma.class.findMany({
+      where: { gameId },
       orderBy: {
         createdAt: 'asc'
       }

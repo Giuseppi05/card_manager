@@ -124,6 +124,9 @@ model Tag {
   cards Card[]
   moves Move[]
 
+  gameId String
+  game   Game @relation(fields: [gameId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

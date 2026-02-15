@@ -4,12 +4,17 @@ import { prisma } from '@/lib/prisma/prisma';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
+    const gameId = searchParams.get('gameId');
     const type = searchParams.get('type');
     
-    let whereClause = {};
+    if (!gameId) {
+      return NextResponse.json({ error: 'gameId is required' }, { status: 400 });
+    }
+    
+    let whereClause: any = { gameId };
     
     if (type) {
-      whereClause = { type: type };
+      whereClause.type = type;
     }
 
     const logos = await prisma.logo.findMany({
